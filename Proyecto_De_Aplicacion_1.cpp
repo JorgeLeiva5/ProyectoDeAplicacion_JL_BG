@@ -1,51 +1,70 @@
 #include <iostream>
-#include <fstream>
+#include <vector>
 #include <string>
+#include <algorithm>
+#include <fstream>
 #include <filesystem>
-#include <queue>
-#include "CDs.h"
-
+#include <fstream>
+#include <sstream>
+#include "Cancion.h"
+#include "Disco.h"
+#include "Reproductor.h"
 using namespace std;
-namespace fs = filesystem;
 
 int main() {
-    string carpeta, DISCO;
-    int ContadorDeListas = 0, ContadorDeCanciones = 0;
-    cout << "Ingrese la ruta de la carpeta para cargar sus CD's (RESPALDO): ";
-    cin >> carpeta;
-    try {
-        for (const auto& inicio : fs::directory_iterator(carpeta)) {
-            if (inicio.is_regular_file() && inicio.path().extension() == ".txt") {
-                ifstream file(inicio.path());
-                if (file.is_open()) {
-                    cout << "Contenido de " << inicio.path().filename() << ":" << endl;
-                    string linea;
-                    DISCO == inicio.path().filename();
-                    while (getline(file, linea)) {
-                        cout << linea << endl;
-                        ContadorDeCanciones++;
-                    }
+    Reproductor reproductor;
 
-                    CDs DISCO = CDs();
+    int opcion = 0;
 
-                    // *********** ESPACIO PARA CREAR LAS COLAS *****************
+    do {
+        cout << "\n--- Menu ---" << endl;
+        cout << "1. Cargar respaldos" << endl;
+        cout << "2. Agregar Cancion" << endl;
+        cout << "3. Ver Cola de Reproduccion" << endl;
+        cout << "4. Ordenar Cola de Reproduccion" << endl;
+        cout << "5. Reproducir Cancion Actual" << endl;
+        cout << "6. Reproducir Siguiente Cancion" << endl;
+        cout << "7. Salir" << endl;
 
-
-                    file.close();
-                }
-                else {
-                    cerr << "No se pudo abrir el archivo: " << inicio.path().filename() << endl;
-                }
-            }
-            ContadorDeListas++;
-            cout << DISCO << endl;
+        cout << "Seleccione una opcion: ";
+        while (!(cin >> opcion)) {
+            cout << "Por favor, ingrese un número válido: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-    }
-    catch (const exception& e) {
-        cerr << "Error al acceder a la carpeta: " << e.what() << endl;
-    }
 
-    cout << ContadorDeListas << endl;
-    cout << ContadorDeCanciones << endl;
+        switch (opcion) {
+        case 1:
+            reproductor.cargarRespaldos();
+            break;
+        case 2:
+            reproductor.agregarCancion();
+            break;
+        case 3:
+            reproductor.verColaReproduccion();
+            break;
+        case 4:
+            reproductor.ordenarCola();
+            break;
+        case 5:
+            reproductor.reproducirActual();
+            break;
+        case 6:
+            reproductor.reproducirSiguiente();
+            break;
+        case 7:
+            break;
+        default:
+            cout << "Opción no válida. Por favor, intente nuevamente." << endl;
+            break;
+        }
+
+        // Pausar y esperar que el usuario presione enter para continuar
+        cout << "\nPresione ENTER para continuar...";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin.get();
+
+    } while (opcion != 7);
+
+    return 0;
 }
-
