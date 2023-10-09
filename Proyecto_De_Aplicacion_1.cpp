@@ -1,70 +1,93 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <fstream>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-#include "Cancion.h"
-#include "Disco.h"
 #include "Reproductor.h"
-using namespace std;
+#include <iostream>
+
 
 int main() {
-    Reproductor reproductor;
+    //std::string RUTAN;
+    //std::cout << "Ingrese la rura para buscar sus archivos: ";
+    //std::cin >> RUTAN;
+    //Reproductor reproductor(RUTAN);
+    // no pudimos leer la ruta :(
 
-    int op;
+    Reproductor reproductor("C:\\ArchivosdePrueba_20231001"); // Ingresar aca la ruta de la carpeta
 
+    int opcion = 0;
     do {
-        cout << "\n--- Menu ---" << endl;
-        cout << "1. Cargar respaldos" << endl;
-        cout << "2. Agregar Cancion" << endl;
-        cout << "3. Ver Cola de Reproduccion" << endl;
-        cout << "4. Ordenar Cola de Reproduccion" << endl;
-        cout << "5. Reproducir Cancion Actual" << endl;
-        cout << "6. Reproducir Siguiente Cancion" << endl;
-        cout << "7. Salir" << endl;
+        std::cout << "\n--- Menu Principal ---\n";
+        std::cout << "1. Cargar y mostrar canciones\n";
+        std::cout << "2. Agregar Cancion a la cola de reproduccion\n";
+        std::cout << "3. Ver Cola de Reproduccion\n";
+        std::cout << "4. Reproducir siguiente\n";
+        std::cout << "5. Mostrar reproduccion actual\n";
+        std::cout << "6. Salir\n";
+        std::cout << "Ingrese una opcion: ";
+        std::cin >> opcion;
+        std::cin.ignore();
 
-        cout << "Seleccione una opcion: ";
-        while (!(cin >> op)) {
-            cout << "Por favor, ingrese un número válido: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-
-        switch (op) {
+        switch (opcion) {
         case 1:
-            reproductor.cargarRespaldos();
+            reproductor.cargarCDs();
+            reproductor.mostrarCDs();
             break;
+
         case 2:
-            reproductor.agregarCancion();
+            reproductor.mostrarCDs();
+            std::cout << "\nSeleccione un CD por su numero: ";
+            int indiceCD;
+            std::cin >> indiceCD;
+            reproductor.mostrarCancionesDeCD(indiceCD - 1);
+            std::cout << "\nSeleccione una cancion por su numero: ";
+            int indiceCancion;
+            std::cin >> indiceCancion;
+            reproductor.agregarACola(indiceCD - 1, indiceCancion - 1);
             break;
+
         case 3:
-            reproductor.verColaReproduccion();
+            std::cout << "\n--- Ver Cola de Reproduccion ---\n";
+            std::cout << "1. Ver tal cual\n";
+            std::cout << "2. Ordenar por nombre del artista\n";
+            std::cout << "3. Ordenar por nombre de la cancion\n";
+            std::cout << "4. Ordenar por duracion de la cancion\n";
+            std::cout << "Ingrese una opcion: ";
+            int opcionCola;
+            std::cin >> opcionCola;
+            switch (opcionCola) {
+            case 1:
+                reproductor.mostrarColaReproduccion();
+                break;
+            case 2:
+                reproductor.ordenarColaPorArtista();
+                reproductor.mostrarColaReproduccion();
+                break;
+            case 3:
+                reproductor.ordenarColaPorNombre();
+                reproductor.mostrarColaReproduccion();
+                break;
+            case 4:
+                reproductor.ordenarColaPorDuracion();
+                reproductor.mostrarColaReproduccion();
+                break;
+                std::cout << "Opcion no valida.\n";
+                break;
+            }
             break;
+
         case 4:
-            reproductor.ordenarCola();
-            break;
-        case 5:
-            reproductor.reproducirActual();
-            break;
-        case 6:
             reproductor.reproducirSiguiente();
             break;
-        case 7:
+        case 5:
+            reproductor.mostrarReproduccionActual();
             break;
+        case 6:
+            std::cout << "¡Hasta luego!\n";
+            break;
+
         default:
-            cout << "Opción no válida. Por favor, intente nuevamente." << endl;
+            std::cout << "Opcion no valida. Por favor, intente nuevamente.\n";
             break;
         }
-
-        // Pausar y esperar que el usuario presione enter para continuar
-        cout << "\nPresione ENTER para continuar...";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cin.get();
-
-    } while (op != 7);
+    } while (opcion != 6);
 
     return 0;
 }
+
