@@ -14,7 +14,7 @@ using namespace std;
 int main() {
     Reproductor reproductor;
 
-    int opcion = 0;
+    int op;
 
     do {
         cout << "\n--- Menu ---" << endl;
@@ -27,13 +27,13 @@ int main() {
         cout << "7. Salir" << endl;
 
         cout << "Seleccione una opcion: ";
-        while (!(cin >> opcion)) {
+        while (!(cin >> op)) {
             cout << "Por favor, ingrese un número válido: ";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
 
-        switch (opcion) {
+        switch (op) {
         case 1:
             reproductor.cargarRespaldos();
             break;
@@ -64,7 +64,7 @@ int main() {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin.get();
 
-    } while (opcion != 7);
+    } while (op != 7);
 
     return 0;
 }

@@ -1,22 +1,24 @@
 #pragma once
-#include <iostream>
-#include <vector>
+#ifndef CANCION_H
+#define CANCION_H
+
 #include <string>
-#include <algorithm>
-#include <fstream>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-using namespace std;
 
-class Cancion
-{
+class Cancion {
+private:
+    std::string nombre;
+    std::string artista;
+    std::string duracion;
+
 public:
-    string nombre;
-    string artista;
-    string duracion;
+    Cancion(const std::string& nombre, const std::string& artista, const std::string& duracion);
 
-    Cancion(){}
-    Cancion(string _nombre, string _artista, string _duracion) : nombre(_nombre), artista(_artista), duracion(_duracion) {}
+    std::string getNombre() const;
+    std::string getArtista() const;
+    std::string getDuracion() const;
+
+public:
+    Cancion();
 };
 
+#endif

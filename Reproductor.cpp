@@ -1,177 +1,179 @@
 #include "Reproductor.h"
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <filesystem>
+#include "CD.h"
 
-vector<Disco> CDs;
-vector<Cancion> cola;
-Cancion* reproduciendo = nullptr;
 
-void cargarRespaldos() {
-    cout << "Introduce la ruta de los respaldos (sin espacios, para rutas con espacios, use comillas): ";
-    string ruta;
-    cin.ignore(); // Limpiar el búfer para getline
-    getline(cin, ruta);
 
-    vector<string> archivos = listarArchivos(ruta);
-    if (archivos.empty()) {
-        cout << "No se encontraron archivos en la ruta especificada." << endl;
-        return;
-    }
+Reproductor::Reproductor(const std::string& ruta) : ruta(ruta) {}
 
-    for (const auto& archivo : archivos) {
-        cout << "Procesando archivo: " << archivo << endl; // Mensaje de depuración
-        Disco cd = cargarCDDesdeArchivo(ruta + "/" + archivo);
-        if (!cd.canciones.empty()) {
-            CDs.push_back(cd);
-            cout << "CD " << cd.nombreCD << " cargado con éxito." << endl; // Mensaje de confirmación
+
+void Reproductor::cargarCDs() {
+    for (const auto& file : std::filesystem::directory_iterator(ruta)) {
+        if (file.path().extension() == "ArchivosdePrueba_20231001") { // Ingresar aca el nombre de la carpeta de los archivos
+            std::ifstream inFile(file.path());
+
+            if (!inFile.is_open()) {
+                std::cout << "Error al abrir el archivo: " << file.path() << std::endl;
+                continue;
+            }
+
+            std::string line;
+            CD cdActual(file.path().stem().string());
+
+            while (getline(inFile, line)) {
+                std::istringstream iss(line);
+                std::string nombre, artista, duracion;
+
+
+                std::getline(iss, nombre, '|');
+                iss.ignore(1);
+                std::getline(iss, artista, '|');
+                iss.ignore(1);
+                std::getline(iss, duracion);
+
+                if (nombre.empty() || artista.empty() || duracion.empty()) {
+                    std::cout << "Formato de linea incorrecto en el archivo: " << file.path() << std::endl;
+                    continue;
+                }
+
+                Cancion cancion(nombre, artista, duracion);
+                cdActual.agregarCancion(cancion);
+            }
+
+            if (cdActual.getCanciones().empty()) {
+                std::cout << "Archivo vacio: " << file.path() << std::endl;
+                continue;
+            }
+
+            cds.push_back(cdActual);
+
+            inFile.close();
         }
-        else {
-            cout << "Error al cargar CD desde archivo: " << archivo << endl; // Mensaje de error
+    }
+}
+
+void Reproductor::mostrarCDs() const {
+    int count = 1;
+    for (const CD& cd : cds) {
+        std::cout << count << ". " << cd.getNombreCD() << std::endl;
+        count++;
+    }
+}
+
+int Reproductor::getNumeroCDs() const {
+    return cds.size();
+}
+
+void Reproductor::mostrarCancionesDeCD(int index) const {
+    if (index >= 0 && index < cds.size()) {
+        const CD& cdSeleccionado = cds[index];
+        std::cout << "Canciones en CD: " << cdSeleccionado.getNombreCD() << std::endl;
+        int count = 1;
+        for (const Cancion& cancion : cdSeleccionado.getCanciones()) {
+            std::cout << count << ". " << cancion.getNombre() << " || "
+                << cancion.getArtista() << " || "
+                << cancion.getDuracion() << std::endl;
+            count++;
         }
-    }
-}
-
-Disco cargarCDDesdeArchivo(const string& rutaArchivo) {
-    ifstream archivo(rutaArchivo);
-    if (!archivo.is_open()) {
-        throw runtime_error("No se pudo abrir el archivo " + rutaArchivo);
-    }
-
-    Disco cd;
-    cd.nombreCD = filesystem::path(rutaArchivo).filename().replace_extension().string();
-
-    string linea;
-    while (getline(archivo, linea)) {
-        stringstream ss(linea);
-        string nombre, artista, duracion;
-
-        getline(ss, nombre, '|');
-        getline(ss, artista, '|');
-        getline(ss, duracion, '|');
-
-        Cancion cancion;
-        cancion.nombre = nombre;
-        cancion.artista = artista;
-        cancion.duracion = duracion;
-
-        cd.canciones.push_back(cancion);
-    }
-
-    archivo.close();
-    return cd;
-}
-
-
-bool formatoValido(const string& linea) {
-    int Count = count(linea.begin(), linea.end(), '|');
-    return Count == 4 && linea.find("||") != string::npos;
-}
-
-void mostrarCDs() {
-    for (int i = 0; i < CDs.size(); ++i) {
-        cout << i + 1 << ". " << CDs[i].nombreCD << endl;
-    }
-}
-
-void agregarCancion() {
-    mostrarCDs();
-    mostrarCDs();
-    int eleccion;
-    cout << "Seleccione un CD: ";
-    cin >> eleccion;
-    if (eleccion <= 0 || eleccion > CDs.size()) {
-        cout << "Selección no válida." << endl;
-        return;
-    }
-
-    Disco& cdElegido = CDs[eleccion - 1];
-    for (int i = 0; i < cdElegido.canciones.size(); ++i) {
-        cout << i + 1 << ". " << cdElegido.canciones[i].nombre << endl;
-    }
-    cout << "Seleccione una canción: ";
-    cin >> eleccion;
-    if (eleccion <= 0 || eleccion > cdElegido.canciones.size()) {
-        cout << "Selección no válida." << endl;
-        return;
-    }
-
-    cola.push_back(cdElegido.canciones[eleccion - 1]);
-    cout << "Canción agregada a la cola." << endl;
-}
-
-void verColaReproduccion() {
-    if (cola.empty()) {
-        std::cout << "Cola de reproducción vacía." << std::endl;
-        return;
-    }
-
-    for (const auto& cancion : cola) {
-        std::cout << cancion.nombre << " - " << cancion.artista << " - " << cancion.duracion << std::endl;
-    }
-}
-
-
-void reproducirActual() {
-    if (reproduciendo) {
-        cout << "Reproduciendo: " << reproduciendo->nombre << " - " << reproduciendo->artista << " - " << reproduciendo->duracion << endl;
     }
     else {
-        cout << "Reproducción en pausa." << endl;
+        std::cout << "Indice de CD invalido." << std::endl;
     }
 }
 
-
-void reproducirSiguiente() {
-    if (cola.empty()) {
-        cout << "Cola de reproducción vacía." << endl;
-        return;
-    }
-
-    if (reproduciendo) {
-        cola.push_back(*reproduciendo);
-    }
-    reproduciendo = &cola.front();
-    cola.erase(cola.begin());
-}
-
-void ordenarCola() {
-    cout << "1. Ordenar por artista\n";
-    cout << "2. Ordenar por canción\n";
-    cout << "3. Ordenar por duración\n";
-    int eleccion;
-    cin >> eleccion;
-
-    switch (eleccion) {
-    case 1:
-        sort(cola.begin(), cola.end(), [](const Cancion& a, const Cancion& b) {
-            return a.artista < b.artista;
-            });
-        break;
-    case 2:
-        sort(cola.begin(), cola.end(), [](const Cancion& a, const Cancion& b) {
-            return a.nombre < b.nombre;
-            });
-        break;
-    case 3:
-        sort(cola.begin(), cola.end(), [](const Cancion& a, const Cancion& b) {
-            return a.duracion < b.duracion;
-            });
-        break;
-    default:
-        cout << "Opción no válida." << endl;
-        break;
-    }
-}
-
-vector <string> listarArchivos(const string& ruta) {
-    vector<string> archivos;
-    for (const auto& entry : filesystem::directory_iterator(ruta)) {
-        if (entry.is_regular_file() && entry.path().extension() == ".txt") {
-            archivos.push_back(entry.path().filename().string());
+void Reproductor::agregarACola(int indiceCD, int indiceCancion) {
+    if (indiceCD >= 0 && indiceCD < cds.size()) {
+        CD& cdSeleccionado = cds[indiceCD];
+        if (indiceCancion >= 0 && indiceCancion < cdSeleccionado.getCanciones().size()) {
+            colaDeReproduccion.push_back(cdSeleccionado.getCanciones()[indiceCancion]);
+            std::cout << "Cancion agregada a la cola de reproduccion.\n";
+        }
+        else {
+            std::cout << "Índice de canción invalido.\n";
         }
     }
-    return archivos;
+    else {
+        std::cout << "Indice de CD invalido.\n";
+    }
+}
+
+void Reproductor::mostrarColaReproduccion() const {
+    int count = 1;
+    for (const Cancion& cancion : colaDeReproduccion) {
+        std::cout << count << ". " << cancion.getNombre() << " || "
+            << cancion.getArtista() << " || "
+            << cancion.getDuracion() << std::endl;
+        count++;
+    }
 }
 
 
+void Reproductor::ordenarColaPorArtista() {
+    int n = colaDeReproduccion.size();
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (colaDeReproduccion[j].getArtista().compare(colaDeReproduccion[j + 1].getArtista()) > 0) {
+                std::swap(colaDeReproduccion[j], colaDeReproduccion[j + 1]);
+            }
+        }
+    }
+}
+
+void Reproductor::ordenarColaPorNombre() {
+    int n = colaDeReproduccion.size();
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (colaDeReproduccion[j].getNombre().compare(colaDeReproduccion[j + 1].getNombre()) > 0) {
+                std::swap(colaDeReproduccion[j], colaDeReproduccion[j + 1]);
+            }
+        }
+    }
+}
+
+// 
+void Reproductor::ordenarColaPorDuracion() {
+    int n = colaDeReproduccion.size();
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            double duracion1 = std::stod(colaDeReproduccion[j].getDuracion().substr(0, colaDeReproduccion[j].getDuracion().find(':')))
+                + std::stoi(colaDeReproduccion[j].getDuracion().substr(colaDeReproduccion[j].getDuracion().find(':') + 1)) / 60.0;
+
+            double duracion2 = std::stod(colaDeReproduccion[j + 1].getDuracion().substr(0, colaDeReproduccion[j + 1].getDuracion().find(':')))
+                + std::stoi(colaDeReproduccion[j + 1].getDuracion().substr(colaDeReproduccion[j + 1].getDuracion().find(':') + 1)) / 60.0;
+
+            if (duracion1 > duracion2) {
+                std::swap(colaDeReproduccion[j], colaDeReproduccion[j + 1]);
+            }
+        }
+    }
+}
+
+void Reproductor::mostrarReproduccionActual() const {
+    if (!colaDeReproduccion.empty()) {
+        Cancion cancionEnReproduccion = colaDeReproduccion.front();
+        std::cout << "Reproduciendo:\n";
+        std::cout << cancionEnReproduccion.getNombre() << " || ";
+        std::cout << cancionEnReproduccion.getArtista() << " || ";
+        std::cout << cancionEnReproduccion.getDuracion();
+    }
+    else {
+        std::cout << "Reproduccion en Pausa\n";
+    }
+}
 
 
+void Reproductor::reproducirSiguiente() {
+    if (!colaDeReproduccion.empty()) {
+        cancionActual = &(colaDeReproduccion.front());
+        colaDeReproduccion.erase(colaDeReproduccion.begin());
+
+    }
+    else {
+        cancionActual = nullptr;
+        cdActual = nullptr;
+        reproduciendo = false;
+    }
+}

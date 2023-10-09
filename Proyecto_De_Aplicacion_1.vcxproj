@@ -142,13 +142,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cancion.cpp" />
-    <ClCompile Include="Disco.cpp" />
+    <ClCompile Include="CD.cpp" />
     <ClCompile Include="Proyecto_De_Aplicacion_1.cpp" />
     <ClCompile Include="Reproductor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cancion.h" />
-    <ClInclude Include="Disco.h" />
+    <ClInclude Include="CD.h" />
     <ClInclude Include="Reproductor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

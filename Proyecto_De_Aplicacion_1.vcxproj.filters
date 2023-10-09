@@ -21,10 +21,10 @@
     <ClCompile Include="Cancion.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Disco.cpp">
+    <ClCompile Include="Reproductor.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Reproductor.cpp">
+    <ClCompile Include="CD.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +32,10 @@
     <ClInclude Include="Cancion.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Disco.h">
+    <ClInclude Include="Reproductor.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Reproductor.h">
+    <ClInclude Include="CD.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
